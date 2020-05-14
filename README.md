@@ -12,12 +12,4 @@ To install, run:
 composer create-project weareferal/craft my-site
 ```
 
-The primary differences:
-
-* Include some custom configuration scripts in `bin` and `conf`
-* Include some extra plugins
-* Automatically install our custom dependencies
-* Include custom Tailwind CSS and JavaScript frontend Gulp files
-* Automatically run a post install script to automate config
-
 You can find full documentation on setting up a new project [in the Feral Docs](https://docs.weareferal.com/development/craft/new-project-setup/)
