@@ -20,4 +20,4 @@ The primary differences:
 * Include custom Tailwind CSS and JavaScript frontend Gulp files
 * Automatically run a post install script to automate config
 
-You can find full documentation on setting up a new project in the Feral Docs.
+You can find full documentation on setting up a new project [in the Feral Docs](https://docs.weareferal.com/development/craft/new-project-setup/)

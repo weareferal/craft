@@ -1,4 +1,5 @@
 <?php
+
 /**
  * General Configuration
  *
@@ -35,7 +36,11 @@ return [
 
         'enableCsrfProtection' => true,
 
-        'resourceBasePath' => dirname(__DIR__) . '/web/cpresources'
+        'resourceBasePath' => dirname(__DIR__) . '/web/cpresources',
+
+        'aliases' => [
+            '@webroot' => dirname(__DIR__) . '/web',
+        ]
     ],
 
     // Dev environment settings
