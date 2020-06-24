@@ -14,6 +14,11 @@ let App = {
 };
 
 (() => {
+  console.info(
+    "%cSite designed and developed by Feral 👋 https://weareferal.com",
+    "color: #CC9D39"
+  );
+
   // Bind components
   document.querySelectorAll("[data-component]").forEach(el => {
     let names = el.getAttribute("data-component").split(",");
