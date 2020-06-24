@@ -38,6 +38,8 @@ return [
 
         'resourceBasePath' => dirname(__DIR__) . '/web/cpresources',
 
+        'enableGql' => false,
+
         'aliases' => [
             '@webroot' => dirname(__DIR__) . '/web',
         ]
@@ -67,5 +69,8 @@ return [
         'useSecureCookies' => true,
 
         'sendPoweredByHeader' => false,
+
+        // Required for FastCGI
+        'pathInfo' => true
     ],
 ];
