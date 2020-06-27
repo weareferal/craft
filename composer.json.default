@@ -8,7 +8,7 @@
     "nystudio107/craft-typogrify": "^1.1.0",
     "weareferal/remote-backup": "^1.1.0",
     "weareferal/remote-sync": "^1.2.0",
-    "weareferal/craft-matrix-field-preview": "^1.0.0"
+    "weareferal/matrix-field-preview": "^1.0.0"
   },
   "require-dev": {
     "yiisoft/yii2-shell": "^2.0.3"
