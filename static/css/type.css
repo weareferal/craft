@@ -1,34 +1,31 @@
 /**
-  * This is a "type system" abstraction on top of the basic font-based classes
-  * supplied by Tailwind by default. Without this is would be exceptionally
-  * tedious to have to apply the same font classes names over and over. 
-  * 
-  * These styles come directly from Figma's styles
-  *
- **/
-
-.type-example-sm,
-.type-example-base,
-.type-example-lg,
-.type-example-xl,
-.type-example-2xl,
-.type-example-3xl {
+ * This is a "type system" abstraction on top of the basic font-based classes
+ * supplied by Tailwind by default. Without this is would be exceptionally
+ * tedious to have to apply the same font classes names over and over.
+ */
+.type-0,
+.type-1,
+.type-2,
+.type-3,
+.type-4,
+.type-5 {
 }
+@responsive {
+  .type-0 {
+  }
 
-.type-example-sm {
-}
+  .type-1 {
+  }
 
-.type-example-base {
-}
+  .type-2 {
+  }
 
-.type-example-lg {
-}
+  .type-3 {
+  }
 
-.type-example-xl {
-}
+  .type-4 {
+  }
 
-.type-example-2xl {
-}
-
-.type-example-3xl {
+  .type-5 {
+  }
 }

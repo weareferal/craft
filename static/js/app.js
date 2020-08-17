@@ -45,9 +45,6 @@ let App = {
           let obj = new Constructor(el, options);
           existing.push(name);
           setData(el, { component: obj });
-          console.debug(`[App] Component "${name}" loaded.`);
-        } else {
-          console.debug(`[App] Component "${name}" already loaded`);
         }
       }
     });

@@ -1,272 +1,254 @@
-let gulp = require("gulp"),
-  imagemin = require("gulp-imagemin"),
-  plumber = require("gulp-plumber"),
-  rename = require("gulp-rename"),
-  sourcemaps = require("gulp-sourcemaps"),
-  stylelint = require("gulp-stylelint"),
-  terser = require("gulp-terser"),
-  svgSprite = require("gulp-svg-sprite"),
-  babelify = require("babelify"),
-  browserify = require("browserify"),
-  browserSync = require("browser-sync"),
-  cssnano = require("cssnano"),
-  buffer = require("vinyl-buffer"),
-  source = require("vinyl-source-stream"),
-  postcss = require("gulp-postcss"),
-  postcssImport = require("postcss-import"),
-  postcssNested = require("postcss-nested"),
-  postcssProperties = require("postcss-custom-properties"),
-  autoprefixer = require("autoprefixer"),
-  tailwindcss = require("tailwindcss"),
-  purgecss = require("@fullhuman/postcss-purgecss"),
-  purgecssFromJs = require("purgecss-from-js");
+"use strict";
 
-/**
- * Paths
- *
- * Return paths configuration.
- */
-let paths = (function () {
-  this.basePath = ".";
-  return {
-    templates: `${this.basePath}/templates`,
-    src: `${this.basePath}/static`,
-    dst: `${this.basePath}/web`,
-  };
-})();
+import awspublish from "gulp-awspublish";
+import autoprefixer from "autoprefixer";
+import buffer from "vinyl-buffer";
+import babelify from "babelify";
+import browserify from "browserify";
+import browserSync from "browser-sync";
+import cssnano from "cssnano";
+import dotenv from "dotenv";
+import del from "del";
+import environments from "gulp-environments";
+// import ts from "gulp-typescript";
+import gulp from "gulp";
+import imagemin from "gulp-imagemin";
+import plumber from "gulp-plumber";
+import postcss from "gulp-postcss";
+import postcssImport from "postcss-import";
+import postcssNested from "postcss-nested";
+import postcssProperties from "postcss-custom-properties";
+import rename from "gulp-rename";
+import rev from "gulp-rev";
+import revFormat from "gulp-rev-format";
+import tailwindcss from "tailwindcss";
+import terser from "gulp-terser"; // successor to uglify-js
+import source from "vinyl-source-stream";
+import svgSprite from "gulp-svg-sprite";
+import sourcemaps from "gulp-sourcemaps";
+import stylelint from "gulp-stylelint";
+import purgecss from "@fullhuman/postcss-purgecss";
+import purgecssFromJs from "purgecss-from-js";
+import webp from "gulp-webp";
 
-/**
- * Vendors
- *
- * List of modules to get bundled into vendors minified file.
- */
-let vendors = [
-  "lazysizes",
-  "lazysizes/plugins/object-fit/ls.object-fit",
-  "lazysizes/plugins/unveilhooks/ls.unveilhooks",
-  "scrollmagic",
-  "scrollmagic/scrollmagic/uncompressed/plugins/debug.addIndicators",
-  "scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap",
-  "smooth-scrollbar",
-  "gsap",
-  "gsap/ScrollToPlugin",
-];
+dotenv.config();
 
-/**
- * Server Task
- *
- * Launch server using BrowserSync.
- *
- * @param {*} done
- */
-function server(done) {
-  browserSync.init({
-    proxy: "[[name]].local:8888/",
-    open: false,
-  });
-  done();
-}
+let production = environments.production;
+let development = environments.development;
+let config = {
+  paths: {
+    templates: "./templates",
+    src: "./static",
+    dest: "./web/static",
+  },
+  vendor: {
+    paths: [
+      "lazysizes",
+      "lazysizes/plugins/object-fit/ls.object-fit",
+      "lazysizes/plugins/unveilhooks/ls.unveilhooks",
+      "scrollmagic",
+      "scrollmagic/scrollmagic/uncompressed/plugins/debug.addIndicators",
+      "scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap",
+      "smooth-scrollbar",
+      "gsap",
+      "gsap/ScrollToPlugin",
+    ],
+  },
+  revisions: {
+    extensions: "js,css,gif,jpg,png,gif,svg,ico,webp",
+  },
+};
 
-/**
- * Reload Task
- *
- * Reload page with BrowserSync.
- *
- * @param {*} done
- */
-function reload(done) {
-  browserSync.reload();
-  done();
-}
+function styles() {
+  let plugins = [
+    postcssImport({
+      root: `${config.paths.src}/css *`,
+    }),
+    postcssNested(),
+    postcssProperties(),
+    tailwindcss("./tailwind.config.cjs"),
+    autoprefixer(),
+  ];
 
-/**
- * CSS Task
- *
- * The css files are run through postcss/autoprefixer and placed into one
- * single main styles.min.css file (and sourcemap)
- */
-function css() {
+  // Only minify and purge when building for production
+  if (production()) {
+    plugins = plugins.concat([
+      purgecss({
+        content: [
+          `${config.paths.src}/js/**/*.js`,
+          `${config.paths.templates}/**/*.twig`,
+          `${config.paths.templates}/**/*.html`,
+        ],
+        defaultExtractor: (content) => {
+          return content.match(/[\w-/:]+(?<!:)/g) || [];
+        },
+        whitelist: ["lazyload", "lazyloading", "lazyloaded"],
+      }),
+      cssnano(),
+    ]);
+  }
+
   return gulp
-    .src(`${paths.src}/css/styles.css`)
+    .src(`${config.paths.src}/css/styles.css`)
     .pipe(plumber())
     .pipe(
       stylelint({
         reporters: [{ formatter: "string", console: true }],
       })
     )
-    .pipe(sourcemaps.init())
-    .pipe(
-      postcss([
-        postcssImport({
-          root: `${paths.src}/css *`,
-        }),
-        postcssNested(),
-        postcssProperties(),
-        tailwindcss(),
-        autoprefixer(),
-        purgecss({
-          content: [
-            `${paths.src}/js/**/*.js`,
-            `${paths.templates}/**/*.twig`,
-            `${paths.templates}/**/*.html`,
-          ],
-          defaultExtractor: (content) => {
-            return content.match(/[\w-/:]+(?<!:)/g) || [];
-          },
-        }),
-        cssnano(),
-      ])
-    )
-    .pipe(rename("styles.min.css"))
-    .pipe(sourcemaps.write("."))
-    .pipe(gulp.dest(`${paths.dst}/css/`))
-    .pipe(browserSync.reload({ stream: true }));
+    .pipe(buffer()) // sourcemap plugin does not support stream
+    .pipe(development(sourcemaps.init())) // sourcemaps on dev only
+    .pipe(rename("styles.css"))
+    .pipe(postcss(plugins))
+    .pipe(development(sourcemaps.write(".")))
+    .pipe(gulp.dest(`${config.paths.dest}/css/`));
 }
 
-/**
- * JS Task
- *
- * All regular .js files are collected, minified and concatonated into one
- * single scripts.min.js file (and sourcemap)
- */
-function js() {
+function scripts() {
   return browserify({
-    entries: `${paths.src}/js/app.js`,
-    debug: true,
+    entries: `${config.paths.src}/js/app.js`,
+    external: config.vendor.paths,
+    transform: [
+      babelify.configure({
+        presets: ["@babel/preset-env"],
+        plugins: [
+          ["@babel/plugin-proposal-decorators", { legacy: true }],
+          ["@babel/plugin-proposal-class-properties", {}],
+        ],
+      }),
+    ],
   })
-    .external(
-      vendors.map((vendor) => {
-        if (vendor.expose) {
-          return vendor.expose;
-        }
-        return vendor;
-      })
-    )
-    .transform(babelify, {
-      presets: ["@babel/preset-env"],
-      plugins: [
-        ["@babel/plugin-proposal-decorators", { legacy: true }],
-        ["@babel/plugin-proposal-class-properties", {}],
-      ],
-      sourceMaps: true,
-    })
     .bundle()
-    .on("error", function (err) {
-      console.error(err);
-      this.emit("end");
-    })
     .pipe(source("scripts.js"))
-    .pipe(buffer())
-    .pipe(rename("scripts.min.js"))
-    .pipe(sourcemaps.init({ loadMaps: true }))
-    .pipe(terser())
-    .pipe(sourcemaps.write("."))
-    .pipe(gulp.dest(`${paths.dst}/js/`))
-    .pipe(browserSync.reload({ stream: true }));
+    .pipe(buffer()) // sourcemap plugin does not support stream
+    .pipe(development(sourcemaps.init({ loadMaps: true })))
+    .pipe(production(terser())) // uglify replacement
+    .pipe(development(sourcemaps.write(".")))
+    .pipe(gulp.dest(`${config.paths.dest}/js/`));
 }
 
-exports.js = js;
-
-/**
- * Vendor Task
- *
- * All vendor .js files are collected, minified and concatonated into one
- * single vendor.min.js file (and sourcemap)
- */
 function vendor() {
-  const b = browserify({
+  return browserify({
     debug: true,
-  });
-
-  vendors.forEach((lib) => {
-    if (lib.expose) {
-      b.require(lib.path, { expose: lib.expose });
-    } else {
-      b.require(lib);
-    }
-  });
-
-  return b
+    require: vendor.paths,
+  })
     .bundle()
-    .on("error", function (err) {
-      console.error(err);
-      this.emit("end");
-    })
     .pipe(source("vendor.js"))
-    .pipe(buffer())
-    .pipe(rename("vendor.min.js"))
-    .pipe(sourcemaps.init({ loadMaps: true }))
-    .pipe(terser())
-    .pipe(sourcemaps.write("."))
-    .pipe(gulp.dest(`${paths.dst}/js/`));
+    .pipe(buffer()) // sourcemap plugin does not support stream
+    .pipe(development(sourcemaps.init({ loadMaps: true })))
+    .pipe(terser()) // uglify replacement
+    .pipe(development(sourcemaps.write(".")))
+    .pipe(gulp.dest(`${config.paths.dest}/js/`));
 }
 
-exports.vendor = vendor;
-
-/**
- * Images Task
- *
- * All images are optimized and copied to static folder.
- */
 function images() {
   return gulp
-    .src([`${paths.src}/images/**/*.{jpg,png,gif,svg,ico}`])
+    .src([`${config.paths.src}/images/**/*.{jpg,jpeg,png,gif,svg,ico}`])
     .pipe(plumber())
     .pipe(
-      imagemin({ optimizationLevel: 5, progressive: true, interlaced: true })
+      imagemin([
+        imagemin.gifsicle({ interlaced: true }),
+        imagemin.mozjpeg({ quality: 75, progressive: true }),
+        imagemin.optipng({ optimizationLevel: 5 }),
+        imagemin.svgo({
+          plugins: [{ removeViewBox: true }, { cleanupIDs: false }],
+        }),
+      ])
     )
-    .pipe(gulp.dest(`${paths.dst}/images/`));
+    .pipe(gulp.dest(`${config.paths.dest}/images/`))
+    .pipe(webp())
+    .pipe(gulp.dest(`${config.paths.dest}/images/`));
 }
 
-/**
- * Fonts Task
- *
- * All fonts are copied to static folder.
- */
 function fonts() {
   return gulp
-    .src([`${paths.src}/fonts/**/*`], {
-      base: `${paths.src}`,
+    .src([`${config.paths.src}/fonts/**/*`], {
+      base: `${config.paths.src}`,
     })
-    .pipe(gulp.dest(`${paths.dst}`));
+    .pipe(gulp.dest(`${config.paths.dest}`));
 }
 
-/**
- * Watch Task
- *
- * Watch files to run proper tasks.
- */
+function revision() {
+  return gulp
+    .src([`${config.paths.dest}/**/*.{${config.revisions.extensions}}`])
+    .pipe(plumber())
+    .pipe(rev())
+    .pipe(
+      revFormat({
+        prefix: ".",
+      })
+    )
+    .pipe(gulp.dest(`${config.paths.dest}`))
+    .pipe(rev.manifest())
+    .pipe(gulp.dest(`${config.paths.dest}`));
+}
+
+function publish() {
+  let publisher = awspublish.create({
+    region: process.env.DIGITAL_OCEAN_SPACES_REGION,
+    params: {
+      Bucket: process.env.DIGITAL_OCEAN_SPACES_BUCKET,
+      ACL: "public",
+    },
+    accessKeyId: process.env.DIGITAL_OCEAN_SPACES_KEY,
+    secretAccessKey: process.env.DIGITAL_OCEAN_SPACES_SECRET,
+    endpoint: process.env.DIGITAL_OCEAN_SPACES_ENDPOINT,
+  });
+  let headers = {
+    "Cache-Control": "max-age=315360000, no-transform, public",
+  };
+  return gulp
+    .src(`${config.paths.dest}/**/*`)
+    .pipe(
+      rename((path) => {
+        path.dirname = "/static/" + path.dirname;
+      })
+    )
+    .pipe(publisher.publish(headers))
+    .pipe(awspublish.reporter());
+}
+
+function server() {
+  browserSync.init({
+    proxy: "[[name]].local:8888/",
+    open: false, // don't open on load
+  });
+}
+
+function reload(done) {
+  browserSync.reload();
+  done(); // needed to prevent reload only working once
+}
+
+function clean() {
+  return del([`${config.paths.dest}`]);
+}
+
 function watch() {
-  gulp.watch(`${paths.src}/css/**/*.css`, css);
-  gulp.watch(`${paths.src}/js/**/*.js`, js);
-  gulp.watch(`${paths.src}/images/**/*`, gulp.series(images, reload));
-  gulp.watch(`${paths.src}/fonts/**/*`, gulp.series(fonts, reload));
-  gulp.watch(`${paths.templates}/**/*.twig`, reload);
-  gulp.watch(`./tailwind.config.js`, css);
+  gulp.watch(
+    [`${config.paths.src}/css/**/*.css`, `./tailwind.config.cjs`],
+    gulp.series(styles, reload)
+  );
+  gulp.watch(`${config.paths.src}/js/**/*.js`, gulp.series(scripts, reload));
+  gulp.watch(`${config.paths.src}/images/**/*`, gulp.series(images, reload));
+  gulp.watch(`${config.paths.src}/fonts/**/*`, gulp.series(fonts, reload));
+  gulp.watch(`${config.paths.templates}/**/*.{html,twig}`, reload);
   gulp.watch(`./gulpfile.js`, reload);
 }
 
-/**
- * Default Task
- *
- * Running just `gulp` will:
- * - Compile JS and CSS files
- * - Optimize and copy images to static folder
- * - Copy fonts to static folder
- * - Launch BrowserSync & watch files
- */
-exports.default = gulp.series(
+let run = gulp.series(
   vendor,
-  gulp.parallel(js, css, fonts, images),
+  gulp.parallel(scripts, styles, fonts, images),
   gulp.parallel(server, watch)
 );
 
-/**
- * Build Task
- *
- * Running just `gulp build` will:
- * - Compile JS and CSS files
- * - Optimize and copy images to static folder
- * - Copy fonts to static folder
- */
-exports.build = gulp.series(vendor, gulp.parallel(js, css, fonts, images));
+let build = gulp.series(
+  clean,
+  vendor,
+  gulp.parallel(scripts, styles, fonts, images),
+  revision
+);
+
+let deploy = gulp.series(build, publish);
+
+export { run as default, build, deploy };
