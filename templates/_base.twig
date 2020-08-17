@@ -1,5 +1,8 @@
-{% extends "_root.twig" %}
+{% set env = getenv('ENVIRONMENT') %}
+{% set googleAnalyticsId = getenv('GOOGLE_ANALYTICS_ID') %}
+{% set bugherdId = getenv('BUGHERD_ID') %}
 
+{% spaceless %}
 {%- block htmlPage -%}
     <!DOCTYPE html>
     <html class="fonts-loaded" lang="{{ craft.app.language |slice(0,2) }}" prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#">
@@ -8,26 +11,24 @@
             <meta charset="utf-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
             <meta name="referrer" content="origin-when-cross-origin" />
-            <link rel="icon" href="/images/favicon.ico?v=1.0"> 
+            <link rel="icon" href="{{ rev('images/favicon.ico') }}"> 
             {% block headContent %}
                 {% block headMeta %}
                     {% hook "seo" %}
                 {% endblock headMeta %}
                 {% block headLinks %}{% endblock headLinks %}
                 {% block headJs %}{% endblock headJs %}
-            
                 <style>
                     [v-cloak] {display: none !important;}
                     {% block headCss %}{% endblock headCss %}
                 </style>
-            
-                <link rel="stylesheet" href="{{ '/css/styles.min.css' | version }}" />
+                <link rel="stylesheet" href="{{ rev('css/styles.min.css') }}" />
             {% endblock headContent %}
         </head>
         <body data-component="body" class="{% block bodyClasses %}{% endblock %}">
             {% block bodyContent %}{% endblock bodyContent %}
-            <script type="text/javascript" src="{{ '/js/vendor.min.js' | version }}"></script>
-            <script type="text/javascript" src="{{ '/js/scripts.min.js' | version }}"></script>
+            <script type="text/javascript" src="{{ rev('js/vendor.min.js') }}"></script>
+            <script type="text/javascript" src="{{ rev('js/scripts.min.js') }}"></script>
 
             {% if bugherdId %}
                 <script async src="https://www.bugherd.com/sidebarv2.js?apikey={{ bugherdId }}"></script>
@@ -46,4 +47,4 @@
             {% block bodyJs %}{% endblock bodyJs %}
         </body>
     </html>
-{%- endblock htmlPage -%}
+{%- endblock htmlPage -%}{% endspaceless }

@@ -44,7 +44,11 @@ return [
 
         'aliases' => [
             '@webroot' => dirname(__DIR__) . '/web',
-        ]
+        ],
+
+        'defaultImageQuality' => 100,
+
+        'upscaleImages' => false
     ],
 
     // Dev environment settings
@@ -73,6 +77,8 @@ return [
         'sendPoweredByHeader' => false,
 
         // Required for FastCGI
-        'pathInfo' => true
+        'pathInfo' => true,
+        'usePathInfo' => true,
+        'omitScriptNameInUrls' => true
     ],
 ];
