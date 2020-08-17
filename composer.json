@@ -44,8 +44,8 @@
       "@php -r \"mkdir('storage');\"",
       "@php -r \"rename('composer.json.default', 'composer.json');\"",
       "@composer dump-autoload -o",
-      "sh ./bin/composer/post-install.sh",
-      "@composer update"
+      "@composer update --no-scripts",
+      "sh ./bin/composer/post-install.sh"
     ]
   }
 }
