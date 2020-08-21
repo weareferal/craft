@@ -107,6 +107,7 @@ function styles() {
 function scripts() {
   return browserify({
     entries: `${config.paths.src}/js/app.js`,
+    bundleExternal: false,
     external: config.vendor.paths,
     transform: [
       babelify.configure({
@@ -129,8 +130,7 @@ function scripts() {
 
 function vendor() {
   return browserify({
-    debug: true,
-    require: vendor.paths,
+    require: config.vendor.paths,
   })
     .bundle()
     .pipe(source("vendor.js"))

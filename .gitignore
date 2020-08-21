@@ -15,7 +15,6 @@ config/license.key
 # ASSETS
 /web/cpresources/
 /web/static
-!/web/static/rev-manifest.json
 
 
 # IMAGER TRANSFORMS
