@@ -13,10 +13,10 @@ config/license.key
 /storage/*
 
 # ASSETS
-/public/assets/*
-/web/assets/*
-/web/tmp/*
-/web/versions/*
+/web/cpresources/
+/web/static
+!/web/static/rev-manifest.json
+
 
 # IMAGER TRANSFORMS
 /public/imager/*
