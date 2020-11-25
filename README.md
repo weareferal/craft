@@ -12,4 +12,4 @@ To install, run:
 composer create-project weareferal/craft my-site
 ```
 
-You can find full documentation on setting up a new project [in the Feral Docs](https://docs.weareferal.com/development/craft/new-project-setup/)
+You can find full documentation on setting up a new project [in the Feral Docs](https://wiki.weareferal.com/development/craft/new-project-setup/)

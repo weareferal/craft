@@ -7,7 +7,7 @@
     "craftcms",
     "project"
   ],
-  "license": "Unlicense",
+  "license": "0BSD",
   "homepage": "https://craftcms.com/",
   "type": "project",
   "support": {
@@ -19,7 +19,7 @@
     "rss": "https://craftcms.com/changelog.rss"
   },
   "require": {
-    "craftcms/cms": "^3.4.25",
+    "craftcms/cms": "^3.5.10",
     "vlucas/phpdotenv": "^3.4.0"
   },
   "require-dev": {
@@ -31,6 +31,7 @@
     }
   },
   "config": {
+    "sort-packages": true,
     "optimize-autoloader": true,
     "platform": {
       "php": "7.4"
