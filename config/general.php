@@ -17,6 +17,8 @@ return [
         // Default Week Start Day (0 = Sunday, 1 = Monday...)
         'defaultWeekStartDay' => 1,
 
+        'usePathInfo' => true,
+
         // Whether generated URLs should omit "index.php"
         'omitScriptNameInUrls' => true,
 
@@ -68,17 +70,11 @@ return [
         // Set this to `false` to prevent administrative changes from being made on production
         'allowAdminChanges' => false,
 
-        'enableTemplateCaching' => true,
+        // Enable if not using FastCGI cache
+        //'enableTemplateCaching' => true,
 
         'sameSiteCookieValue' => 'Lax',
 
         'useSecureCookies' => true,
-
-        'sendPoweredByHeader' => false,
-
-        // Required for FastCGI
-        'pathInfo' => true,
-        'usePathInfo' => true,
-        'omitScriptNameInUrls' => true
     ],
 ];
